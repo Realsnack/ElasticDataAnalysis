@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 
 namespace BackEnd
 {
@@ -26,6 +27,15 @@ namespace BackEnd
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            // Swagger implementation
+            services.AddSwaggerGen(c => 
+            {
+
+                c.SwaggerDoc(Configuration.GetValue<string>("AppVersion"), new OpenApiInfo { 
+                    Title = Configuration.GetValue<string>("AppTitle"), 
+                    Version=Configuration.GetValue<string>("AppTitle")});
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,6 +45,12 @@ namespace BackEnd
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => 
+            {
+                c.SwaggerEndpoint($"/swagger/{Configuration.GetValue<string>("AppVersion")}/swagger.json", Configuration.GetValue<string>("AppTitle"));
+            });
 
             app.UseHttpsRedirection();
 
