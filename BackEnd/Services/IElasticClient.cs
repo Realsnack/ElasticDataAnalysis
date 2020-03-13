@@ -7,6 +7,6 @@ namespace BackEnd.Services
     public interface IElastic
     {
         Task<IEnumerable<Escalation>> GetEscalationsAsync();
-        Task<IEnumerable<InDone>> GetTransaction();
+        Task<IEnumerable<InDone>> GetTransactionAsync(string dionId);
     }
 }
