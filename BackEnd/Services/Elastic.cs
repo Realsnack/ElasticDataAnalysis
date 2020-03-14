@@ -57,7 +57,7 @@ namespace BackEnd.Services
                     .MatchAll()));
             _logger.LogInformation($"Got {escalations.Hits.Count} Escalations.");
 
-            return escalations.HitsMetadata.Hits.Select(s => s.Source);
+            return escalations.HitsMetadata.Hits.Select(s => s.Source).ToList();
         }
 
         public async Task<IEnumerable<InDone>> GetTransactionAsync(string dionId)
@@ -68,6 +68,9 @@ namespace BackEnd.Services
                         .Match(m => m
                             .Field(f => f.OtherParameters.DionHeaderScreeningRequestUniqueId)
                             .Query(dionId))));
+
+            if (searchTrans.Hits.Count == 0)
+                return null;
 
             return searchTrans.HitsMetadata.Hits.Select(s => s.Source);
         }

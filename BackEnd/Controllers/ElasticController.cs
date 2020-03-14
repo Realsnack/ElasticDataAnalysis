@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BackEnd.Models;
 using BackEnd.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -25,23 +27,39 @@ namespace BackEnd.Controllers
             return "OK";
         }
 
-        [HttpGet("test")]
-        public async Task<string> Test()
-        {
-            var response = await _client.GetEscalationsAsync();
-
-            try
-            {
-                return response.Select(s => s.MatchingRule).FirstOrDefault();
-            }
-            catch (System.Exception ex)
-            {
-                _logger.LogError(ex, "Failed in TestGET");
-                return $"FAILED: {ex.Message}";
-            }
-        }
-
         [HttpGet("transaction")]
-        
+        public async Task<IEnumerable<TransactionEscalation>> GetTransactionEscalationsAsync()
+        {
+            _logger.LogDebug("Started api/elastic/transaction.");
+            var escalationsResponse = await _client.GetEscalationsAsync();
+            var escalations = escalationsResponse.ToList();
+            _logger.LogDebug($"Got {escalations.Count} from GetEscalationsAsync()");
+
+            List<TransactionEscalation> transactionsList= new List<TransactionEscalation>();
+
+            foreach (var escalation in escalations)
+            {
+                try
+                {
+                    var transaction = await _client.GetTransactionAsync(escalation.Sid);
+                    if (transaction != null)
+                    {
+                        _logger.LogDebug($"Valid transaciton");
+                        var inDone = transaction.ToList();
+                        _logger.LogDebug($"Transaction is {inDone[0].JmsId} from ID{escalation}");
+                        transactionsList.Add(new TransactionEscalation(inDone[0], escalation));
+                    }
+                    else
+                        _logger.LogDebug("Returned null");
+                }
+                catch (System.Exception ex)
+                {
+                    _logger.LogError(ex, "Error brácho");
+                }
+            }
+
+            _logger.LogDebug($"Returning {transactionsList.Count} transactions");
+            return transactionsList;
+        }
     }
 }

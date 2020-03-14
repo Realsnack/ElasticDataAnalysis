@@ -4,23 +4,23 @@ namespace BackEnd.Models
     {
         public TransactionEscalation(InDone inDone, Escalation escalation)
         {
-            this.Amount = inDone.Amount;
-            this.Creditor = inDone.BeneficiaryAccount;
-            this.Creditor.AccountNumber = inDone.OtherParameters.CreditorIBAN;
-            this.Currency = inDone.Currency;
-            this.Debtor = inDone.DebtorAccount;
-            this.Debtor.AccountNumber = inDone.OtherParameters.DebtorIBAN;
-            this.DionId = inDone.OtherParameters.DionHeaderScreeningRequestUniqueId;
-            this.Direction = inDone.OtherParameters.DionHeaderDirection;
-            this.MatchingRule = escalation.MatchingRule;
-            this.MessageType = inDone.MessageType;
-            this.Receiver = inDone.Receiver;
+            Amount = inDone.Amount;
+            Creditor = inDone.BeneficiaryAccount;
+            Creditor.AccountNumber = inDone.OtherParameters.CreditorIBAN;
+            Currency = inDone.Currency;
+            Debtor = inDone.DebtorAccount;
+            Debtor.AccountNumber = inDone.OtherParameters.DebtorIBAN;
+            DionId = inDone.OtherParameters.DionHeaderScreeningRequestUniqueId;
+            Direction = inDone.OtherParameters.DionHeaderDirection;
+            MatchingRule = escalation.MatchingRule;
+            MessageType = inDone.MessageType;
+            Receiver = inDone.Receiver;
             // this.ScreeningResult = 
             // this.ScreeningResultDescription =
-            this.Sender = inDone.Sender;
-            this.SpecificSymbol = inDone.SpecificSymbol;
-            this.TransactionTimestamp = inDone.OtherParameters.DionHeaderMessageTimeStamp;
-            this.VariableSymbol = inDone.VariableSymbol;
+            Sender = inDone.Sender;
+            SpecificSymbol = inDone.SpecificSymbol;
+            TransactionTimestamp = inDone.OtherParameters.DionHeaderMessageTimeStamp;
+            VariableSymbol = inDone.VariableSymbol;
         }
     }
 }
