@@ -34,6 +34,10 @@ namespace ElasticDTO
 
         [PropertyName("messageType")]
         public string MessageType { get; set; }
+        [PropertyName("receiver")]
+        public string Receiver { get; set; }
+        [PropertyName("sender")]
+        public string Sender { get; set; }
     }
 
     public class OtherParameters
@@ -52,7 +56,7 @@ namespace ElasticDTO
 
         [PropertyName("dionHeaderMessageTimeStamp")]
         public DateTime DionHeaderMessageTimeStamp { get; set; }
-        
+
         [PropertyName("JMSHeaderPriority")]
         public string JmsHeaderPriority { get; set; }
 
@@ -64,13 +68,18 @@ namespace ElasticDTO
     {
         [PropertyName("countryCode")]
         public string CountryCode { get; set; }
+
         [PropertyName("bankCode")]
         public string BankCode { get; set; }
+
         [PropertyName("name")]
         public string Name { get; set; }
+
         [PropertyName("prefix")]
         public string Prefix { get; set; }
+        
         [PropertyName("number")]
         public string Number { get; set; }
+        public string AccountNumber { get; set; }
     }
 }
