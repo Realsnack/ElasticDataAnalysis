@@ -18,6 +18,11 @@ namespace BackEnd.Services
         private readonly string _escalationsIndex;
         private readonly string _inDoneIndex;
 
+        /// <summary>
+        /// Elastic service constructor. Prepares the configuration and creates an ElasticClient.
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="configuration"></param>
         public Elastic(ILogger<Elastic> logger, IConfiguration configuration)
         {
             _logger = logger;
@@ -44,6 +49,10 @@ namespace BackEnd.Services
             _logger.LogDebug($"Created new ElasticClient");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<IEnumerable<Escalation>> GetEscalationsAsync()
         {
             _logger.LogDebug("Started GetEscalationsAsync method");

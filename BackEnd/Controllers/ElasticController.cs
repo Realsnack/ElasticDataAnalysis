@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,13 +28,18 @@ namespace BackEnd.Controllers
             return "OK";
         }
 
+        /// <summary>
+        /// GET method providing TransactionEscalations. Loads ALL escalations and then finds transactions for them.
+        /// </summary>
+        /// <returns>IEnumerable of TransactionEscalation.</returns>
         [HttpGet("transaction")]
         public async Task<IEnumerable<TransactionEscalation>> GetTransactionEscalationsAsync()
         {
             _logger.LogDebug("Started api/elastic/transaction.");
+            _logger.LogInformation($"{DateTime.Now}:GetTransactionEscalations()");
             var escalationsResponse = await _client.GetEscalationsAsync();
             var escalations = escalationsResponse.ToList();
-            _logger.LogDebug($"Got {escalations.Count} from GetEscalationsAsync()");
+            _logger.LogDebug($"Loaded {escalations.Count} from GetEscalationsAsync()");
 
             List<TransactionEscalation> transactionsList= new List<TransactionEscalation>();
 
@@ -58,7 +64,7 @@ namespace BackEnd.Controllers
                 }
             }
 
-            _logger.LogDebug($"Returning {transactionsList.Count} transactions");
+            _logger.LogInformation($"{DateTime.Now}:Returining {transactionsList.Count} transactions");
             return transactionsList;
         }
     }
