@@ -48,19 +48,29 @@ namespace BackEnd.Controllers
                 try
                 {
                     var transaction = await _client.GetTransactionAsync(escalation.Sid);
+                    var result = await _client.GetTransactionResultAsync(escalation.Sid);
                     if (transaction != null)
                     {
                         _logger.LogDebug($"Valid transaciton");
                         var inDone = transaction.ToList();
-                        _logger.LogDebug($"Transaction is {inDone[0].JmsId} from ID{escalation}");
-                        transactionsList.Add(new TransactionEscalation(inDone[0], escalation));
+                        var scoringDone = result.ToList();
+                        _logger.LogDebug($"Transaction is {inDone[0].JmsId} from ID{escalation.Sid}");
+                        if (result != null)
+                        {
+                            _logger.LogDebug($"Added TransactionEscalation JMS ID: {inDone[0].JmsId}\nDionID: {escalation.Sid}\nResult: {scoringDone[0].ScoreNum}");
+                            transactionsList.Add(new TransactionEscalation(inDone[0], escalation, scoringDone[0]));
+                        }
+                        else
+                        {
+                            _logger.LogInformation($"Couldn't get result of transaction {escalation.Sid}");
+                        }
                     }
                     else
-                        _logger.LogDebug("Returned null");
+                        _logger.LogInformation($"Couldn't get result of transaction {escalation.Sid}");
                 }
                 catch (System.Exception ex)
                 {
-                    _logger.LogError(ex, "Error brácho");
+                    _logger.LogError(ex, "Unhandled exception");
                 }
             }
 

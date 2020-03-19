@@ -1,7 +1,7 @@
 using System;
 using Nest;
 
-namespace ElasticDTO.Models
+namespace ElasticDTO
 {
     public class ScoringDone
     {
@@ -19,7 +19,6 @@ namespace ElasticDTO.Models
         public string ScoreNum { get; set; }
         [PropertyName("id")]
         public string DionId { get; set; }
-        }
     }
 
     public class ErrorMessage

@@ -2,7 +2,7 @@ namespace BackEnd.Models
 {
     public class TransactionEscalation : ElasticDTO.TransactionEscalation
     {
-        public TransactionEscalation(InDone inDone, Escalation escalation)
+        public TransactionEscalation(InDone inDone, Escalation escalation, ScoringDone scoringDone)
         {
             Amount = inDone.Amount;
             Creditor = inDone.BeneficiaryAccount;
@@ -16,8 +16,8 @@ namespace BackEnd.Models
             MatchingRule = escalation.MatchingRule;
             MessageType = inDone.MessageType;
             Receiver = inDone.Receiver;
-            // this.ScreeningResult = 
-            // this.ScreeningResultDescription =
+            ScreeningResult = scoringDone.ScoreCode;
+            ScreeningResultDescription = scoringDone.ScoreNum;
             Sender = inDone.Sender;
             SpecificSymbol = inDone.SpecificSymbol;
             TransactionTimestamp = inDone.OtherParameters.DionHeaderMessageTimeStamp;

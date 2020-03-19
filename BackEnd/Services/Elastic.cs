@@ -17,6 +17,7 @@ namespace BackEnd.Services
         private readonly ElasticClient _client;
         private readonly string _escalationsIndex;
         private readonly string _inDoneIndex;
+        private readonly string _scoringDoneIndex;
 
         /// <summary>
         /// Elastic service constructor. Prepares the configuration and creates an ElasticClient.
@@ -43,6 +44,7 @@ namespace BackEnd.Services
 
             _escalationsIndex = configuration.GetValue<string>("Elastic:Escalations-index");
             _inDoneIndex = configuration.GetValue<string>("Elastic:InDone-index");
+            _scoringDoneIndex = configuration.GetValue<string>("Elastic:ScoringDone-index");
 
             var settings = new ConnectionSettings(uris[0]).BasicAuthentication(username, password).DefaultIndex(_escalationsIndex);
             _client = new ElasticClient(settings);
@@ -82,6 +84,21 @@ namespace BackEnd.Services
                 return null;
 
             return searchTrans.HitsMetadata.Hits.Select(s => s.Source);
+        }
+
+        public async Task<IEnumerable<ScoringDone>> GetTransactionResultAsync(string dionId)
+        {
+            var searchResult = await _client.SearchAsync<ScoringDone>(d =>
+                d.Index(_scoringDoneIndex)
+                .Query(q =>
+                    q.Match(m => m
+                        .Field(f => f.DionId)
+                        .Query(dionId))));
+
+            if (searchResult.Hits.Count == 0)
+                return null;
+
+            return searchResult.HitsMetadata.Hits.Select(s => s.Source);
         }
     }
 }

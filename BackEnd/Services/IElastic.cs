@@ -8,5 +8,6 @@ namespace BackEnd.Services
     {
         Task<IEnumerable<Escalation>> GetEscalationsAsync();
         Task<IEnumerable<InDone>> GetTransactionAsync(string dionId);
+        Task<IEnumerable<ScoringDone>> GetTransactionResultAsync(string dionId);
     }
 }
