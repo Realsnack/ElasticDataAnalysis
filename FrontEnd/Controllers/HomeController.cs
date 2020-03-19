@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using FrontEnd.Models;
 using System.Net.Http;
 using FrontEnd.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace FrontEnd.Controllers
 {
@@ -15,13 +16,15 @@ namespace FrontEnd.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IApiClient _client;
+        private readonly string Env;
 
         public IEnumerable<TransactionEscalation> TransactionEscalations { get; set; }
 
-        public HomeController(ILogger<HomeController> logger, IApiClient client)
+        public HomeController(ILogger<HomeController> logger, IApiClient client, IConfiguration configuration)
         {
             _logger = logger;
             _client = client;
+            Env = configuration.GetValue<string>("Environment");
         }
 
         public async Task<IActionResult> Index()
@@ -30,6 +33,7 @@ namespace FrontEnd.Controllers
             var data = await _client.GetTransactionsWithEscalationsAsync();
             ViewBag.transactions = data.ToList();
             _logger.LogInformation($"Loaded {data.Count} transactions from BackEnd API");
+            ViewBag.environment = Env;
             return View();
         }
 

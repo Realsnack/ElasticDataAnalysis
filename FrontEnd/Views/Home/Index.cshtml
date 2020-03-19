@@ -9,7 +9,10 @@
 
 <table class="table" style="font-size: 0.8em;">
     <tr>
-        <th>Jms Id</th>
+        @if (ViewBag.environment == "Dev")
+        {
+            <th>Jms Id</th>
+        }
         <th>Čas transakce</th>
         <th>ID</th>
         <th>Č. Ú. přijemce</th>
@@ -23,7 +26,10 @@
     @foreach (TransactionEscalation row in ViewBag.transactions)
     {
         <tr>
-            <td>@row.JmsId</td>
+            @if (ViewBag.environment == "Dev")
+            {
+                <td>@row.JmsId</td>
+            }
             <td>@row.TransactionTimestamp</td>
             <td>@row.DionId</td>
             @if (row.Creditor.AccountNumber == null || row.Creditor.AccountNumber == "")
