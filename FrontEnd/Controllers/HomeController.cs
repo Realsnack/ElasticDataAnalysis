@@ -6,20 +6,30 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using FrontEnd.Models;
+using System.Net.Http;
+using FrontEnd.Services;
 
 namespace FrontEnd.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IApiClient _client;
 
-        public HomeController(ILogger<HomeController> logger)
+        public IEnumerable<TransactionEscalation> TransactionEscalations { get; set; }
+
+        public HomeController(ILogger<HomeController> logger, IApiClient client)
         {
             _logger = logger;
+            _client = client;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            // Load from BackEnd API
+            var data = await _client.GetTransactionsWithEscalationsAsync();
+            ViewBag.transactions = data.ToList();
+            _logger.LogInformation($"Loaded {data.Count} transactions from BackEnd API");
             return View();
         }
 

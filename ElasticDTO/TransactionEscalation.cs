@@ -11,6 +11,7 @@ namespace ElasticDTO
         public Account Creditor { get; set; }
         public string Direction { get; set; }
         public Account Debtor { get; set; }
+        public string JmsId { get; set; }
         public string MatchingRule { get; set; }
         public string MessageType { get; set; }
         public string Receiver { get; set; }

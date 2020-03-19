@@ -12,6 +12,7 @@ namespace BackEnd.Models
             Debtor.AccountNumber = inDone.OtherParameters.DebtorIBAN;
             DionId = inDone.OtherParameters.DionHeaderScreeningRequestUniqueId;
             Direction = inDone.OtherParameters.DionHeaderDirection;
+            JmsId = inDone.JmsId;
             MatchingRule = escalation.MatchingRule;
             MessageType = inDone.MessageType;
             Receiver = inDone.Receiver;

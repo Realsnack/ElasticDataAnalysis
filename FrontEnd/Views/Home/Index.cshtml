@@ -6,3 +6,47 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<table class="table" style="font-size: 0.8em;">
+    <tr>
+        <th>Jms Id</th>
+        <th>Čas transakce</th>
+        <th>ID</th>
+        <th>Č. Ú. přijemce</th>
+        <th>Č. Ú. plátce</th>
+        <th>Částka</th>
+        <th>Typ transakce</th>
+        <th>Směr transakce</th>
+        <th>Pravidlo</th>
+        <th>Výsledek</th>
+    </tr>
+    @foreach (TransactionEscalation row in ViewBag.transactions)
+    {
+        <tr>
+            <td>@row.JmsId</td>
+            <td>@row.TransactionTimestamp</td>
+            <td>@row.DionId</td>
+            @if (row.Creditor.AccountNumber == null || row.Creditor.AccountNumber == "")
+            {
+                <td>@row.Creditor.AccountNumber</td>
+            }
+            else
+            {
+                <td>@row.Creditor.Prefix-@row.Creditor.Number/@row.Creditor.BankCode</td>
+            }
+            @if (row.Creditor.AccountNumber != null)
+            {
+                <td>@row.Debtor.AccountNumber</td>
+            }
+            else
+            {
+                <td>Error brácho</td>
+            }
+            <td>@row.Amount</td>
+            <td>@row.MessageType</td>
+            <td>@row.Direction</td>
+            <td>@row.MatchingRule</td>
+            <td>@row.ScreeningResultDescription</td>
+        </tr>
+    }
+</table>
