@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BackEnd.Models;
 using BackEnd.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace BackEnd.Controllers
@@ -15,17 +16,19 @@ namespace BackEnd.Controllers
     {
         private readonly ILogger<ElasticController> _logger;
         private readonly IElastic _client;
+        private readonly IConfiguration _configuration;
 
-        public ElasticController(ILogger<ElasticController> logger, IElastic elasticClient)
+        public ElasticController(ILogger<ElasticController> logger, IElastic elasticClient, IConfiguration configuration)
         {
             _logger = logger;
             _client = elasticClient;
+            _configuration = configuration;
         }
 
         [HttpGet]
-        public string Get()
+        public EndpointVersion Get()
         {
-            return "OK";
+            return new EndpointVersion(_configuration);
         }
 
         /// <summary>
