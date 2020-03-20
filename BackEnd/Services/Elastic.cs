@@ -18,6 +18,7 @@ namespace BackEnd.Services
         private readonly string _escalationsIndex;
         private readonly string _inDoneIndex;
         private readonly string _scoringDoneIndex;
+        private readonly string _errorMessage;
 
         /// <summary>
         /// Elastic service constructor. Prepares the configuration and creates an ElasticClient.
@@ -45,6 +46,7 @@ namespace BackEnd.Services
             _escalationsIndex = configuration.GetValue<string>("Elastic:Escalations-index");
             _inDoneIndex = configuration.GetValue<string>("Elastic:InDone-index");
             _scoringDoneIndex = configuration.GetValue<string>("Elastic:ScoringDone-index");
+            _errorMessage = configuration.GetValue<string>("Elastic:ErrorMessage");
 
             var settings = new ConnectionSettings(uris[0]).BasicAuthentication(username, password).DefaultIndex(_escalationsIndex);
             _client = new ElasticClient(settings);
@@ -88,8 +90,8 @@ namespace BackEnd.Services
 
         public async Task<IEnumerable<ScoringDone>> GetTransactionResultAsync(string dionId)
         {
-            var searchResult = await _client.SearchAsync<ScoringDone>(d =>
-                d.Index(_scoringDoneIndex)
+            var searchResult = await _client.SearchAsync<ScoringDone>(d => d
+                .Index(_scoringDoneIndex)
                 .Query(q =>
                     q.Match(m => m
                         .Field(f => f.DionId)
@@ -103,13 +105,22 @@ namespace BackEnd.Services
 
         public async Task<IEnumerable<ErrorTransaction>> GetErrorTransactionsAsync()
         {
-            var searchError = await _client.SearchAsync<ScoringDone>(e =>
-                e.Index(_scoringDoneIndex)
+            var count = await _client.CountAsync<ScoringDone>(e => e
+                .Index(_scoringDoneIndex)
                 .Query(q => q
                     .Match(m => m
-                        .Field(f => f.Error.Message)
-                        .Query(""))));
+                        .Field(f => f.Error.Code)
+                        .Query(_errorMessage))));
+                        
+            _logger.LogDebug($"Got {count.Count} errors");
 
+            var searchError = await _client.SearchAsync<ScoringDone>(e => e
+                .Index(_scoringDoneIndex)
+                .Size(Convert.ToInt32(count.Count))
+                .Query(q => q
+                    .Match(m => m
+                        .Field(f => f.Error.Code)
+                        .Query(_errorMessage))));
 
             if (searchError.Hits.Count == 0)
                 return null;

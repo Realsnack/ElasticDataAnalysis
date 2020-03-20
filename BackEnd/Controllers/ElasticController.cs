@@ -36,12 +36,12 @@ namespace BackEnd.Controllers
         public async Task<IEnumerable<TransactionEscalation>> GetTransactionEscalationsAsync()
         {
             _logger.LogDebug("Started api/elastic/transaction.");
-            _logger.LogInformation($"{DateTime.Now}:GetTransactionEscalations()");
+            _logger.LogInformation($"{DateTime.Now}:GetTransactionEscalationsAsync()");
             var escalationsResponse = await _client.GetEscalationsAsync();
             var escalations = escalationsResponse.ToList();
             _logger.LogDebug($"Loaded {escalations.Count} from GetEscalationsAsync()");
 
-            List<TransactionEscalation> transactionsList= new List<TransactionEscalation>();
+            List<TransactionEscalation> transactionsList = new List<TransactionEscalation>();
 
             foreach (var escalation in escalations)
             {
@@ -76,6 +76,18 @@ namespace BackEnd.Controllers
 
             _logger.LogInformation($"{DateTime.Now}:Returining {transactionsList.Count} transactions");
             return transactionsList;
+        }
+
+        [HttpGet("errors")]
+        public async Task<IEnumerable<ErrorTransaction>> GetErrorTransactionsAsync()
+        {
+            _logger.LogDebug("Started api/elastic/errors.");
+            _logger.LogInformation($"{DateTime.Now}:GetErrorTransactionsAsync()");
+            var errorTransactionResponse = await _client.GetErrorTransactionsAsync();
+            // var errorTransactions = errorTransactionResponse.ToList();
+            _logger.LogDebug($"Loaded {errorTransactionResponse.Count()} from GetErrorTransactionsAsync()");
+
+            return errorTransactionResponse;
         }
     }
 }
