@@ -100,5 +100,27 @@ namespace BackEnd.Services
 
             return searchResult.HitsMetadata.Hits.Select(s => s.Source);
         }
+
+        public async Task<IEnumerable<ErrorTransaction>> GetErrorTransactionsAsync()
+        {
+            var searchError = await _client.SearchAsync<ScoringDone>(e =>
+                e.Index(_scoringDoneIndex)
+                .Query(q => q
+                    .Match(m => m
+                        .Field(f => f.Error.Message)
+                        .Query(""))));
+
+
+            if (searchError.Hits.Count == 0)
+                return null;
+
+            var returnList = new List<ErrorTransaction>();
+            foreach (var trans in searchError.HitsMetadata.Hits.Select(s => s.Source))
+            {
+                returnList.Add(new ErrorTransaction(trans));
+            }
+            
+            return returnList;
+        }
     }
 }
