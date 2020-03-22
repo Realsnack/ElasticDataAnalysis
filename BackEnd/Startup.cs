@@ -20,9 +20,12 @@ namespace BackEnd
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _dateFormat = Configuration.GetValue<string>("DateTimeFormat");
         }
 
         public IConfiguration Configuration { get; }
+        private static string _dateFormat;
+        public static string LogTimeStamp() => DateTime.Now.ToString(_dateFormat) + ":\t";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)

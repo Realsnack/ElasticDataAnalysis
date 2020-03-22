@@ -49,34 +49,43 @@ namespace BackEnd.Controllers
 
             List<TransactionEscalation> transactionsList = new List<TransactionEscalation>();
 
-            foreach (var escalation in escalations)
+            if (escalations[0].Sid == "Error")
             {
-                try
+                _logger.LogWarning($"{BackEnd.Startup.LogTimeStamp()}Couldn't return any TransactionEscalation - Returning Error transaction");
+            }
+            else if (escalations.Count >= 1)
+            {
+                foreach (var escalation in escalations)
                 {
-                    var transaction = await _client.GetTransactionAsync(escalation.Sid);
-                    var result = await _client.GetTransactionResultAsync(escalation.Sid);
-                    if (transaction != null)
+                    try
                     {
-                        _logger.LogDebug($"{LogTimeStamp()}Valid transaction {transaction.Select(s => s.OtherParameters.DionHeaderScreeningRequestUniqueId)}");
-                        var inDone = transaction.ToList();
-                        var scoringDone = result.ToList();
-                        _logger.LogDebug($"{LogTimeStamp()}Transaction is {inDone[0].JmsId} from ID{escalation.Sid}");
-                        if (result != null)
+                        var transaction = await _client.GetTransactionAsync(escalation.Sid);
+                        var result = await _client.GetTransactionResultAsync(escalation.Sid);
+                        if (transaction != null)
                         {
-                            _logger.LogDebug($"{LogTimeStamp()}Added TransactionEscalation JMS ID: {inDone[0].JmsId}\nDionID: {escalation.Sid}\nResult: {scoringDone[0].ScoreNum}");
-                            transactionsList.Add(new TransactionEscalation(inDone[0], escalation, scoringDone[0]));
+                            _logger.LogDebug($"{LogTimeStamp()}Valid transaction {transaction.Select(s => s.OtherParameters.DionHeaderScreeningRequestUniqueId)}");
+                            var inDone = transaction.ToList();
+                            var scoringDone = result.ToList();
+                            _logger.LogDebug($"{LogTimeStamp()}Transaction is {inDone[0].JmsId} from ID{escalation.Sid}");
+                            if (result != null)
+                            {
+                                _logger.LogDebug($"{LogTimeStamp()}Added TransactionEscalation JMS ID: {inDone[0].JmsId}\nDionID: {escalation.Sid}\nResult: {scoringDone[0].ScoreNum}");
+                                transactionsList.Add(new TransactionEscalation(inDone[0], escalation, scoringDone[0]));
+                            }
+                            else
+                                _logger.LogWarning($"{LogTimeStamp()}Couldn't get result of transaction {escalation.Sid}");
                         }
                         else
                             _logger.LogWarning($"{LogTimeStamp()}Couldn't get result of transaction {escalation.Sid}");
                     }
-                    else
-                        _logger.LogWarning($"{LogTimeStamp()}Couldn't get result of transaction {escalation.Sid}");
-                }
-                catch (System.Exception ex)
-                {
-                    _logger.LogError(ex, $"{LogTimeStamp()}Unhandled exception");
+                    catch (System.Exception ex)
+                    {
+                        _logger.LogError(ex, $"{LogTimeStamp()}Unhandled exception");
+                    }
                 }
             }
+            else
+                _logger.LogInformation($"{BackEnd.Startup.LogTimeStamp()}No escalations found.");
 
             _logger.LogInformation($"{LogTimeStamp()}Returning {transactionsList.Count} transactions");
             return transactionsList;

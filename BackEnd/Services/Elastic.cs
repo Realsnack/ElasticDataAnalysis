@@ -19,6 +19,7 @@ namespace BackEnd.Services
         private readonly string _inDoneIndex;
         private readonly string _scoringDoneIndex;
         private readonly string _errorMessage;
+        private bool _successfulConnection;
 
         /// <summary>
         /// Elastic service constructor. Prepares the configuration and creates an ElasticClient.
@@ -48,9 +49,28 @@ namespace BackEnd.Services
             _scoringDoneIndex = configuration.GetValue<string>("Elastic:ScoringDone-index");
             _errorMessage = configuration.GetValue<string>("Elastic:ErrorMessage");
 
-            var settings = new ConnectionSettings(uris[0]).BasicAuthentication(username, password).DefaultIndex(_escalationsIndex);
+            var settings = new ConnectionSettings(uris[0]).BasicAuthentication(username, password).DefaultIndex(_escalationsIndex).RequestTimeout(new TimeSpan(0,0,10));
             _client = new ElasticClient(settings);
             _logger.LogDebug($"Created new ElasticClient");
+
+            _logger.LogDebug($"{BackEnd.Startup.LogTimeStamp()}Started PING to Elastic");
+            var connectionTest = _client.Ping();
+
+            if (connectionTest.ApiCall.HttpStatusCode == null)
+            {
+                _logger.LogWarning($"{BackEnd.Startup.LogTimeStamp()}Unsuccessful PING to Elasticsearch most likely due to the server not responding in time ({_client.ConnectionSettings.RequestTimeout.TotalSeconds}).\nConnection information:\n\tURI: {connectionTest.ApiCall.Uri}\n\tException: {connectionTest.OriginalException.Message}\n\tStackTrace{connectionTest.OriginalException.StackTrace}");
+                _successfulConnection = false;
+            }
+            else if (connectionTest.ApiCall.HttpStatusCode == 200)
+            {
+                _logger.LogDebug($"{BackEnd.Startup.LogTimeStamp()}Successful PING to Elasticsearch\nCode: {connectionTest.ApiCall.HttpStatusCode}");
+                _successfulConnection = true;
+            }
+            else
+            {
+                _logger.LogWarning($"{BackEnd.Startup.LogTimeStamp()}Unsuccessful PING to Elasticsearch\nCode: {connectionTest.ApiCall.HttpStatusCode}");
+                _successfulConnection = false;
+            }
         }
 
         /// <summary>
@@ -60,17 +80,25 @@ namespace BackEnd.Services
         public async Task<IEnumerable<Escalation>> GetEscalationsAsync()
         {
             _logger.LogDebug("Started GetEscalationsAsync method");
-            var count = await _client.CountAsync<Escalation>(e => e.Index(_escalationsIndex));
-            _logger.LogInformation($"Got count of {count.Count} escalations from {_escalationsIndex}");
+            if (_successfulConnection)
+            {
+                var count = await _client.CountAsync<Escalation>(e => e.Index(_escalationsIndex));
+                _logger.LogInformation($"Got count of {count.Count} escalations from {_escalationsIndex}");
 
-            _logger.LogDebug("Started query of escalations");
-            var escalations = await _client.SearchAsync<Escalation>(e => e
-                .Size(Convert.ToInt32(count.Count))
-                .Query(q => q
-                    .MatchAll()));
-            _logger.LogInformation($"Got {escalations.Hits.Count} Escalations.");
+                _logger.LogDebug($"{BackEnd.Startup.LogTimeStamp()}Started query of escalations");
+                var escalations = await _client.SearchAsync<Escalation>(e => e
+                    .Size(Convert.ToInt32(count.Count))
+                    .Query(q => q
+                        .MatchAll()));
+                _logger.LogInformation($"{BackEnd.Startup.LogTimeStamp()}Got {escalations.Hits.Count} Escalations.");
 
-            return escalations.HitsMetadata.Hits.Select(s => s.Source).ToList();
+                return escalations.HitsMetadata.Hits.Select(s => s.Source).ToList();
+            }
+            else
+            {
+                _logger.LogWarning($"{BackEnd.Startup.LogTimeStamp()}Couldn't return any escalations due to unsuccessful connection");
+                return new List<Escalation> { new Escalation("", "", "", "", "", "Error", "", "", "", "", "", "", "", "") };
+            }
         }
 
         public async Task<IEnumerable<InDone>> GetTransactionAsync(string dionId)
