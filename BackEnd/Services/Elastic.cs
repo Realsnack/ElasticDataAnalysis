@@ -53,24 +53,7 @@ namespace BackEnd.Services
             _client = new ElasticClient(settings);
             _logger.LogDebug($"Created new ElasticClient");
 
-            _logger.LogDebug($"{BackEnd.Startup.LogTimeStamp()}Started PING to Elastic");
-            var connectionTest = _client.Ping();
-
-            if (connectionTest.ApiCall.HttpStatusCode == null)
-            {
-                _logger.LogWarning($"{BackEnd.Startup.LogTimeStamp()}Unsuccessful PING to Elasticsearch most likely due to the server not responding in time ({_client.ConnectionSettings.RequestTimeout.TotalSeconds}).\nConnection information:\n\tURI: {connectionTest.ApiCall.Uri}\n\tException: {connectionTest.OriginalException.Message}\n\tStackTrace{connectionTest.OriginalException.StackTrace}");
-                _successfulConnection = false;
-            }
-            else if (connectionTest.ApiCall.HttpStatusCode == 200)
-            {
-                _logger.LogDebug($"{BackEnd.Startup.LogTimeStamp()}Successful PING to Elasticsearch\nCode: {connectionTest.ApiCall.HttpStatusCode}");
-                _successfulConnection = true;
-            }
-            else
-            {
-                _logger.LogWarning($"{BackEnd.Startup.LogTimeStamp()}Unsuccessful PING to Elasticsearch\nCode: {connectionTest.ApiCall.HttpStatusCode}");
-                _successfulConnection = false;
-            }
+            TestConnection();
         }
 
         /// <summary>
@@ -80,6 +63,9 @@ namespace BackEnd.Services
         public async Task<IEnumerable<Escalation>> GetEscalationsAsync()
         {
             _logger.LogDebug("Started GetEscalationsAsync method");
+            if (!_successfulConnection)
+                await TestConnection();
+
             if (_successfulConnection)
             {
                 var count = await _client.CountAsync<Escalation>(e => e.Index(_escalationsIndex));
@@ -160,6 +146,28 @@ namespace BackEnd.Services
             }
             
             return returnList;
+        }
+
+        private async Task TestConnection()
+        {
+            _logger.LogDebug($"{BackEnd.Startup.LogTimeStamp()}Started PING to Elastic");
+            var connectionTest = await _client.PingAsync();
+
+            if (connectionTest.ApiCall.HttpStatusCode == null)
+            {
+                _logger.LogWarning($"{BackEnd.Startup.LogTimeStamp()}Unsuccessful PING to Elasticsearch most likely due to the server not responding in time ({_client.ConnectionSettings.RequestTimeout.TotalSeconds}).\nConnection information:\n\tURI: {connectionTest.ApiCall.Uri}\n\tException: {connectionTest.OriginalException.Message}\n\tStackTrace{connectionTest.OriginalException.StackTrace}");
+                _successfulConnection = false;
+            }
+            else if (connectionTest.ApiCall.HttpStatusCode == 200)
+            {
+                _logger.LogDebug($"{BackEnd.Startup.LogTimeStamp()}Successful PING to Elasticsearch\nCode: {connectionTest.ApiCall.HttpStatusCode}");
+                _successfulConnection = true;
+            }
+            else
+            {
+                _logger.LogWarning($"{BackEnd.Startup.LogTimeStamp()}Unsuccessful PING to Elasticsearch\nCode: {connectionTest.ApiCall.HttpStatusCode}");
+                _successfulConnection = false;
+            }
         }
     }
 }
