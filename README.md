@@ -21,6 +21,3 @@ Available methods:
 
 ### Frontend
 Frontend part was created as .Net core MVC web app. Application uses
-
-### Test
-Toto je test GITu
