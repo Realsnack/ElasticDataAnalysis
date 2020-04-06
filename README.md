@@ -20,4 +20,7 @@ Available methods:
 - GET /api/elastic/error
 
 ### Frontend
-Frontend part was created as .Net core MVC web app. Application uses 
+Frontend part was created as .Net core MVC web app. Application uses
+
+### Test
+Toto je test GITu
